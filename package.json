@@ -1,0 +1,19 @@
+{
+  "name": "crypto-monitor",
+  "version": "1.0.0",
+  "description": "Monitoreo de Bitcoin en tiempo real",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.x"
+  },
+  "keywords": [
+    "nodejs",
+    "bitcoin",
+    "monitor"
+  ],
+  "author": "Fran",
+  "license": "ISC"
+}

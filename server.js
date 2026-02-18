@@ -19,11 +19,16 @@ const server = http.createServer((req, res) => {
             }
         });
     }
-    // 2. Endpoint API: Proxy a Binance
+    // 2. Endpoint API: Proxy a CryptoCompare
     else if (req.url === '/api/precio') {
-        const binanceUrl = 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT';
+        const cryptoCompareUrl = 'https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD';
+        const options = {
+            headers: {
+                'User-Agent': 'Nodejs-App'
+            }
+        };
 
-        https.get(binanceUrl, (apiRes) => {
+        https.get(cryptoCompareUrl, options, (apiRes) => {
             let data = '';
 
             apiRes.on('data', (chunk) => {
@@ -34,29 +39,29 @@ const server = http.createServer((req, res) => {
                 try {
                     const json = JSON.parse(data);
 
-                    // Comprobar si tenemos el precio en el formato de Binance
-                    if (json.price) {
-                        const price = parseFloat(json.price);
+                    // Comprobar si tenemos el precio en el formato de CryptoCompare { USD: ... }
+                    if (json.USD) {
+                        const price = parseFloat(json.USD);
 
                         // Devolvemos { price: number }
                         res.writeHead(200, { 'Content-Type': 'application/json' });
                         res.end(JSON.stringify({ price: price }));
                     } else {
-                        console.error('Respuesta inesperada de Binance:', json);
+                        console.error('Respuesta inesperada de CryptoCompare:', json);
                         res.writeHead(500, { 'Content-Type': 'application/json' });
                         res.end(JSON.stringify({ error: 'Formato de API inesperado' }));
                     }
                 } catch (e) {
-                    console.error('Error procesando respuesta de Binance:', e.message);
+                    console.error('Error procesando respuesta de CryptoCompare:', e.message);
                     res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Error al procesar datos de Binance' }));
+                    res.end(JSON.stringify({ error: 'Error al procesar datos de CryptoCompare' }));
                 }
             });
 
         }).on('error', (err) => {
-            console.error('Error de conexión con Binance:', err.message);
+            console.error('Error de conexión con CryptoCompare:', err.message);
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al conectar con Binance' }));
+            res.end(JSON.stringify({ error: 'Error al conectar con CryptoCompare' }));
         });
     }
     // 3. Manejo de 404

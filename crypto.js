@@ -2,17 +2,17 @@ const https = require('https');
 
 // Configuración
 const precioUmbral = 40000;
-// Volvemos a la API de Binance
-const url = 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT';
+// API de CryptoCompare (estable y rápida)
+const url = 'https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD';
 
 const options = {
     headers: {
-        'User-Agent': 'Node.js Crypto Client'
+        'User-Agent': 'Nodejs-App'
     }
 };
 
 function consultarPrecio() {
-    console.log('Intentando conectar con Binance...');
+    console.log('Intentando conectar con CryptoCompare...');
 
     const req = https.get(url, options, (res) => {
         let data = '';
@@ -25,22 +25,15 @@ function consultarPrecio() {
             try {
                 const json = JSON.parse(data);
 
-                // Verificación de datos estructura Binance
-                // Si hay error en la respuesta de la API (ej: rate limit)
-                if (json.code && json.msg) {
-                    console.error('Error de API Binance:', json.msg);
-                    reintentar();
-                    return;
-                }
-
-                if (!json || !json.price) {
+                // Verificación de datos estructura CryptoCompare
+                // Devuelve { USD: 67000.50 }
+                if (!json || !json.USD) {
                     console.error('Error: La API no devolvió el precio esperado.', json);
                     reintentar();
                     return;
                 }
 
-                // El precio viene como string en Binance
-                const precio = parseFloat(json.price);
+                const precio = parseFloat(json.USD);
                 const precioFormateado = precio.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 
                 console.log(`El precio actual de Bitcoin es: ${precioFormateado}`);
@@ -62,7 +55,7 @@ function consultarPrecio() {
 
     req.on('error', (err) => {
         console.error('Error en la petición HTTPS:', err.message);
-        // Si hay error de red (como ENOTFOUND), reintentamos en 10s
+        // Si hay error de red, reintentamos en 10s
         reintentar();
     });
 
