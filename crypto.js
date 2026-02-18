@@ -2,7 +2,6 @@ const https = require('https');
 
 // Configuración
 const precioUmbral = 40000;
-// API pública de CoinDesk (no bloqueada geográficamente)
 const url = 'https://api.coindesk.com/v1/bpi/currentprice.json';
 
 const options = {
@@ -11,9 +10,9 @@ const options = {
     }
 };
 
-console.log('Consultando precio de Bitcoin en CoinDesk...');
+function consultarPrecio() {
+    console.log('Consultando precio de Bitcoin en CoinDesk...');
 
-try {
     const req = https.get(url, options, (res) => {
         let data = '';
 
@@ -28,6 +27,7 @@ try {
                 // Verificación de datos estructura CoinDesk
                 if (!json || !json.bpi || !json.bpi.USD || typeof json.bpi.USD.rate_float === 'undefined') {
                     console.error('Error: La API no devolvió el precio esperado.', json);
+                    reintentar();
                     return;
                 }
 
@@ -46,6 +46,7 @@ try {
 
             } catch (error) {
                 console.error('Error al analizar la respuesta JSON:', error.message);
+                reintentar();
             }
         });
 
@@ -53,10 +54,17 @@ try {
 
     req.on('error', (err) => {
         console.error('Error en la petición HTTPS:', err.message);
+        // Si hay error de red (como ENOTFOUND), reintentamos en 10s
+        reintentar();
     });
 
     req.end();
-
-} catch (error) {
-    console.error('Ocurrió un error inesperado al iniciar la petición:', error.message);
 }
+
+function reintentar() {
+    console.log('Reintentando en 10 segundos...');
+    setTimeout(consultarPrecio, 10000);
+}
+
+// Iniciar la primera consulta
+consultarPrecio();
