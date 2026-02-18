@@ -2,9 +2,9 @@
   "name": "crypto-monitor",
   "version": "1.0.0",
   "description": "Monitoreo de Bitcoin en tiempo real",
-  "main": "server.js",
+  "main": "crypto.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node crypto.js"
   },
   "engines": {
     "node": ">=18.x"
