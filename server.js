@@ -19,11 +19,11 @@ const server = http.createServer((req, res) => {
             }
         });
     }
-    // 2. Endpoint API: Proxy a CoinDesk
+    // 2. Endpoint API: Proxy a Binance
     else if (req.url === '/api/precio') {
-        const coindeskUrl = 'https://api.coindesk.com/v1/bpi/currentprice.json';
+        const binanceUrl = 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT';
 
-        https.get(coindeskUrl, (apiRes) => {
+        https.get(binanceUrl, (apiRes) => {
             let data = '';
 
             apiRes.on('data', (chunk) => {
@@ -34,27 +34,29 @@ const server = http.createServer((req, res) => {
                 try {
                     const json = JSON.parse(data);
 
-                    // Comprobar si tenemos el precio en el formato de CoinDesk
-                    if (json.bpi && json.bpi.USD && json.bpi.USD.rate_float) {
-                        const price = json.bpi.USD.rate_float;
+                    // Comprobar si tenemos el precio en el formato de Binance
+                    if (json.price) {
+                        const price = parseFloat(json.price);
 
-                        // DEVOLVEMOS EL FORMATO QUE EL FRONTEND ESPERA: { price: number }
+                        // Devolvemos { price: number }
                         res.writeHead(200, { 'Content-Type': 'application/json' });
                         res.end(JSON.stringify({ price: price }));
                     } else {
-                        throw new Error('Formato de API inesperado');
+                        console.error('Respuesta inesperada de Binance:', json);
+                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Formato de API inesperado' }));
                     }
                 } catch (e) {
-                    console.error('Error procesando respuesta de CoinDesk:', e.message);
+                    console.error('Error procesando respuesta de Binance:', e.message);
                     res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Error al procesar datos de CoinDesk' }));
+                    res.end(JSON.stringify({ error: 'Error al procesar datos de Binance' }));
                 }
             });
 
         }).on('error', (err) => {
-            console.error('Error de conexión con CoinDesk:', err.message);
+            console.error('Error de conexión con Binance:', err.message);
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al conectar con CoinDesk' }));
+            res.end(JSON.stringify({ error: 'Error al conectar con Binance' }));
         });
     }
     // 3. Manejo de 404
