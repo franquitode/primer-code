@@ -2,8 +2,8 @@ const https = require('https');
 
 // Configuración
 const precioUmbral = 40000;
-// API pública de Binance para el par BTCUSDT
-const url = 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT';
+// API pública de CoinDesk (no bloqueada geográficamente)
+const url = 'https://api.coindesk.com/v1/bpi/currentprice.json';
 
 const options = {
     headers: {
@@ -11,7 +11,7 @@ const options = {
     }
 };
 
-console.log('Consultando precio de Bitcoin en Binance...');
+console.log('Consultando precio de Bitcoin en CoinDesk...');
 
 try {
     const req = https.get(url, options, (res) => {
@@ -25,22 +25,15 @@ try {
             try {
                 const json = JSON.parse(data);
 
-                // Verificación de error en la respuesta de Binance
-                if (json.code && json.msg) {
-                    console.error('Error de Binance:', json.msg);
-                    return;
-                }
-
-                // Verificación de datos
-                if (!json || !json.price) {
+                // Verificación de datos estructura CoinDesk
+                if (!json || !json.bpi || !json.bpi.USD || typeof json.bpi.USD.rate_float === 'undefined') {
                     console.error('Error: La API no devolvió el precio esperado.', json);
                     return;
                 }
 
-                // El precio viene como string en Binance, convertir a float
-                const precio = parseFloat(json.price);
+                // El precio viene como float en rate_float
+                const precio = json.bpi.USD.rate_float;
                 const precioFormateado = precio.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-
 
                 console.log(`El precio actual de Bitcoin es: ${precioFormateado}`);
 
