@@ -2,9 +2,9 @@
   "name": "crypto-monitor",
   "version": "1.0.0",
   "description": "Monitoreo de Bitcoin en tiempo real",
-  "main": "crypto.js",
+  "main": "futbol.js",
   "scripts": {
-    "start": "node crypto.js"
+    "start": "node futbol.js"
   },
   "engines": {
     "node": ">=18.x"
@@ -17,6 +17,8 @@
   "author": "Fran",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12"
   }
 }
